@@ -7,38 +7,41 @@ import usersFromServer from './api/users';
 import categoriesFromServer from './api/categories';
 import productsFromServer from './api/products';
 
-const productsWithCategories = productsFromServer.map((product) => {
-   const category = categoriesFromServer.find(category => product.categoryId === category.id)
+const productsWithCategories = productsFromServer.map(product => {
+  const category = categoriesFromServer.find(
+    categoryToFind => product.categoryId === categoryToFind.id,
+  );
 
-   return {...product, category: category};
+  return { ...product, category };
 });
 
 const products = productsWithCategories.map(product => {
   const user = usersFromServer.find(
-    user => user.id === product.category.ownerId,
+    userToFind => userToFind.id === product.category.ownerId,
   );
 
   return { ...product, owner: user };
 });
 
 const filtersHandler = (array, { selectByUser, query, selectedCategories }) => {
-  let prepared = array.filter(product =>
-    product.name.toLowerCase().includes(query.toLowerCase()),
-  );
+  let prepared = array.filter(product => {
+    return product.name.toLowerCase().includes(query.toLowerCase());
+  });
 
   if (selectByUser !== 'all') {
     prepared = prepared.filter(product => product.owner.name === selectByUser);
   }
 
+  // prettier-ignore
   if (selectedCategories.length > 0) {
     prepared = prepared.filter(product =>
-      selectedCategories.some(category => product.category.title === category),
-    );
+      selectedCategories.some(category => {
+        return product.category.title === category;
+      }));
   }
 
   return prepared;
 };
-
 
 export const App = () => {
   const [selectByUser, setSelectByUser] = useState('all');
@@ -219,9 +222,9 @@ export const App = () => {
       </div>
     </div>
   );
-}
+};
 
-export const Product = ({product}) => {
+export const Product = ({ product }) => {
   return (
     <tr data-cy="Product">
       <td className="has-text-weight-bold" data-cy="ProductId">
@@ -243,15 +246,15 @@ export const Product = ({product}) => {
         {product.owner.name}
       </td>
     </tr>
-  )
-}
+  );
+};
 
 export const User = ({ user, selectByUser, setSelectByUser }) => {
   return (
     <a
       data-cy="FilterUser"
       href="#/"
-      className={cn({'is-active': selectByUser === user.name})}
+      className={cn({ 'is-active': selectByUser === user.name })}
       onClick={() => setSelectByUser(user.name)}
     >
       {user.name}
@@ -259,7 +262,11 @@ export const User = ({ user, selectByUser, setSelectByUser }) => {
   );
 };
 
-export const Category = ({ category, selectedCategories, setSelectedCategories }) => {
+export const Category = ({
+  category,
+  selectedCategories,
+  setSelectedCategories,
+}) => {
   const isSelected = selectedCategories.includes(category.title);
 
   const toggleCategory = () => {
@@ -284,4 +291,4 @@ export const Category = ({ category, selectedCategories, setSelectedCategories }
       {category.title}
     </a>
   );
-}
+};
